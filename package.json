@@ -1,0 +1,14 @@
+{
+  "name": "enum",
+  "version": "1.0.0",
+  "description": "Elixir's Enum module ported to TypeScript",
+  "main": "lib/index.js",
+  "repository": "https://github.com/sloanelybutsurely/enum",
+  "author": "Sloane Perrault <sloane@perrault.email>",
+  "license": "MIT",
+  "devDependencies": {
+    "@jest/globals": "^29.6.4",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  }
+}
