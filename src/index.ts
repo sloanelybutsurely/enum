@@ -1,3 +1,49 @@
+type Either<Ok, Error> = { ok: Ok } | { error: Error };
+
+type Acc<T> = { cont: T } | { halt: T } | { suspend: T };
+
+type Continuation<T> = (acc: Acc<T>) => Result<T>;
+
+type Result<T> =
+  | { done: T }
+  | { halted: T }
+  | { suspended: T; continuation: Continuation<T> };
+
+type Reducer<A, B> = (element: A, current_acc: Acc<B>) => Acc<B>;
+
+type SlicingFun<Element> = (
+  start: number,
+  length: number,
+  step: number,
+) => Array<Element>;
+type ToListFun<Enumerable, Element> = (
+  enumerable: Enumerable,
+) => Array<Element>;
+
+interface EnumerableImpl<Enumerable, Element> {
+  count(
+    enumerable: Enumerable,
+  ): Either<number, EnumerableImpl<Enumerable, Element>>;
+
+  member(
+    enumerable: Enumerable,
+    element: Element,
+  ): Either<boolean, EnumerableImpl<Enumerable, Element>>;
+
+  reduce<Returned>(
+    enumerable: Enumerable,
+    acc: Acc<Returned>,
+    reducer: Reducer<Element, Returned>,
+  ): Result<Returned>;
+
+  slice(
+    enumerable: Enumerable,
+  ): Either<
+    [number, SlicingFun<Element> | ToListFun<Enumerable, Element>],
+    EnumerableImpl<Enumerable, Element>
+  >;
+}
+
 // all?/1
 // all?/2
 // any?/1
