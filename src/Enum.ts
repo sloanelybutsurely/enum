@@ -2,20 +2,20 @@ type Enumerable<T> = Array<T>;
 
 // all?/1
 // all?/2
-const all = <T>(
+export const all = <T>(
   enumerable: Enumerable<T>,
-  predicate: (elem: T) => unknown,
+  predicate: (elem: T) => unknown = (elem: T) => Boolean(elem),
 ): boolean => enumerable.every((elem) => predicate(elem));
 
 // any?/1
 // any?/2
-const any = <T>(
+export const any = <T>(
   enumerable: Enumerable<T>,
-  predicate: (elem: T) => unknown,
+  predicate: (elem: T) => unknown = (elem: T) => Boolean(elem),
 ): boolean => enumerable.some((elem) => predicate(elem));
 
 // at/3
-const at = <T, D = T>(
+export const at = <T, D = T>(
   enumerable: Enumerable<T>,
   idx: number,
   def: T | D | null = null,
@@ -28,14 +28,14 @@ const at = <T, D = T>(
 // concat/1
 
 // concat/2
-const concat = <A, B>(
+export const concat = <A, B>(
   left: Enumerable<A>,
   right: Enumerable<B>,
 ): Enumerable<A | B> => [...left, ...right];
 
 // count/1
 // count/2
-const count = <T>(
+export const count = <T>(
   enumerable: Enumerable<T>,
   predicate?: (elem: T) => unknown,
 ): number =>
@@ -47,12 +47,30 @@ const count = <T>(
 // count_until/3
 // dedup/1
 // dedup_by/2
+
 // drop/2
+export const drop = <T>(
+  enumerable: Enumerable<T>,
+  count: number,
+): Enumerable<T> =>
+  count >= 0
+    ? enumerable.filter((_: T, idx: number) => count <= idx)
+    : enumerable.filter((_: T, idx: number) => idx < enumerable.length + count);
+
 // drop_every/2
 // drop_while/2
 // each/2
+export const each = <T>(
+  enumerable: Enumerable<T>,
+  fun: (elem: T) => void,
+): void => {
+  enumerable.forEach((elem: T) => {
+    fun(elem);
+  });
+};
+
 // empty?/1
-const empty = <T>(enumerable: Enumerable<T>): boolean =>
+export const empty = <T>(enumerable: Enumerable<T>): boolean =>
   enumerable.length === 0;
 
 // fetch/2
