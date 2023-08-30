@@ -9,7 +9,7 @@ type Result<T> =
   | { halted: T }
   | { suspended: T; continuation: Continuation<T> };
 
-type Reducer<A, B> = (element: A, current_acc: Acc<B>) => Acc<B>;
+type Reducer<A, B> = (element: A, acc: B) => Acc<B>;
 
 type SlicingFun<Element> = (
   start: number,
@@ -30,10 +30,10 @@ interface EnumerableImpl<Enumerable, Element> {
     element: Element,
   ): Either<boolean, EnumerableImpl<Enumerable, Element>>;
 
-  reduce<Returned>(
+  reduce<Returned, T = Element>(
     enumerable: Enumerable,
     acc: Acc<Returned>,
-    reducer: Reducer<Element, Returned>,
+    reducer: Reducer<T, Returned>,
   ): Result<Returned>;
 
   slice(
@@ -43,6 +43,52 @@ interface EnumerableImpl<Enumerable, Element> {
     EnumerableImpl<Enumerable, Element>
   >;
 }
+
+export const NumberArrayEnumerableImpl: EnumerableImpl<
+  Array<number>,
+  number
+> = {
+  count(array) {
+    return { ok: array.length };
+  },
+
+  member(_array, _element) {
+    return { error: NumberArrayEnumerableImpl };
+  },
+
+  reduce(array, acc, fun) {
+    if ("halt" in acc) {
+      return { halted: acc.halt };
+    } else if ("suspend" in acc) {
+      return {
+        suspended: acc.suspend,
+        continuation: (acc2) =>
+          NumberArrayEnumerableImpl.reduce(array, acc2, fun),
+      };
+    } else {
+      if (array.length) {
+        const [head, ...tail] = array;
+        return NumberArrayEnumerableImpl.reduce(tail, fun(head, acc.cont), fun);
+      } else {
+        return { done: acc.cont };
+      }
+    }
+  },
+
+  slice(_array) {
+    return { error: NumberArrayEnumerableImpl };
+  },
+};
+
+export const all = <Enumerable, Element>(
+  { reduce }: EnumerableImpl<Enumerable, Element>,
+  enumerable: Enumerable,
+  fun: (a: Element) => boolean,
+) => {
+  const predicate = (entry: Element, _: boolean): Acc<boolean> =>
+    fun(entry) ? { cont: true } : { halt: false };
+  return reduce(enumerable, { cont: true }, predicate);
+};
 
 // all?/1
 // all?/2
